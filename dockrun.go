@@ -61,7 +61,7 @@ func waitForResult(containerID string, signals chan os.Signal, waitCmd chan cmdR
 			case os.Kill:
 				action = "kill"
 			case syscall.SIGTERM:
-				action = "stop"
+				action = "kill"
 			}
 			fmt.Printf("Received signal: %s; cleaning up\n", sig)
 			cmd := exec.Command("docker", action, containerID)
