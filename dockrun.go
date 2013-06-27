@@ -76,7 +76,7 @@ func waitForResult(containerID string, signals chan os.Signal, waitCmd chan cmdR
 func validateArgs(args []string) {
 	failed := false
 	if len(args) < 1 {
-		fmt.Println("dockrun [OPTIONS] IMAGE [COMMAND]\n")
+		fmt.Println("dockrun [OPTIONS] IMAGE [COMMAND]")
 		fmt.Println("OPTIONS - same options as docker run, without -a & -i")
 		failed = true
 	}
