@@ -58,8 +58,6 @@ func waitForResult(containerID string, signals chan os.Signal, waitCmd chan cmdR
 			switch sig {
 			case os.Interrupt:
 				action = "stop"
-			case os.Kill:
-				action = "kill"
 			case syscall.SIGTERM:
 				action = "kill"
 			}
