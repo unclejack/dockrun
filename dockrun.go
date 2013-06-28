@@ -56,7 +56,7 @@ func waitForResult(containerID string, signals chan os.Signal, waitCmd chan cmdR
 		select {
 		case sig := <-signals:
 			switch sig {
-			case os.Interrupt:
+			case syscall.SIGINT:
 				action = "stop"
 			case syscall.SIGTERM:
 				action = "kill"
@@ -123,7 +123,7 @@ func main() {
 
 	// hack to handle signals & wait for "docker wait" to be finished
 	signals := make(chan os.Signal, 1)
-	signal.Notify(signals, os.Interrupt, os.Kill, syscall.SIGTERM)
+	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
 	waitCmdRes := make(chan cmdResult, 1)
 	waitCmd := exec.Command("docker", "wait", containerID)
 	go runCommandSendResult(waitCmd, waitCmdRes)
