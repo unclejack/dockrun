@@ -62,7 +62,7 @@ func waitForResult(containerID string, signals chan os.Signal, waitCmd chan cmdR
 				action = "stop"
 			}
 			fmt.Printf("Received signal: %s; cleaning up\n", sig)
-			cmd := exec.Command("docker", action, containerID)
+			cmd := exec.Command("docker", action, "-t", "2", containerID)
 			out, _, err := runCommandWithOutput(cmd)
 			if err != nil || strings.Contains(out, "Error") {
 				fmt.Printf("stopping container via signal %s failed\n", sig)
