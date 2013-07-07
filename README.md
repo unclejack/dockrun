@@ -28,7 +28,7 @@ dockrun does the following in order to UNIX-ize docker containers:
 3. It sets up a signal handler to make the container behave like a UNIX process.
 This handler makes sure that `docker stop` or `docker kill` gets executed in order to shut down the container and the process running within it.
 4. It runs `docker logs` to retrieve the logs written to stdout and stderr of the process running in the container.
-5. It runs `docker rm` to remove the container before exit. This lets us make dockrun stateless across runs.
+5. It runs `docker rm` to remove the container before exit when `-rm` is provided. This lets us make dockrun stateless across runs.
 6. It exits with the same exit code as the process which was running in the container.
 
 ### Requirements
@@ -47,15 +47,17 @@ dockrun was tested with docker 0.4.6.
 
 You'll find a few examples below.
 
-Print "test":
-```dockrun ubuntu echo "test"```
+Print "test" and automatically delete the container:
+```dockrun -rm ubuntu echo "test"```
 Start and expose a service running on port 5000 in the container via port 42850 on the host:
 ```dockrun -p 42850:5000 myrepo/coolservice```
-Run a process which exits with exit code 3:
+Run a process which exits with exit code 3 and leaves the container behind:
 ```
 $ dockrun ubuntu bash -c "exit 3"
 $ echo $?
 3
 ```
 
-Observation: docker run options ```-a``` and ```-i``` aren't supported by dockrun.
+Observations:
+1. docker run options ```-a``` and ```-i``` aren't supported by dockrun.
+2. `-rm` makes dockrun automatically remove the resulting container
