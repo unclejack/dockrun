@@ -96,6 +96,25 @@ func validateArgs(args []string) {
 	}
 }
 
+func stringInArgs(args []string, target string) bool {
+	for _, value := range args {
+		if value == target {
+			return true
+		}
+	}
+	return false
+}
+
+func filterSlice(s []string, fn func(string) bool) []string {
+	var newSlice []string
+	for _, v := range s {
+		if fn(v) {
+			newSlice = append(newSlice, v)
+		}
+	}
+	return newSlice
+}
+
 // WARNING: 'docker wait', 'docker logs', 'docker rm', 'docker kill' and 'docker stop'
 // exit with status code 0 even if they've failed.
 
