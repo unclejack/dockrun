@@ -16,7 +16,7 @@ It tries to bring the following features to docker run:
 
 1. return the exit code of the process when the container exists
 2. print logging output (stderr and stdout) to stdout when the container has exited
-3. automatically remove the container when all operations are done
+3. automatically remove the container when all operations are done if -rm is provided
 4. handle signals for process termination
 
 ### How it works
@@ -59,5 +59,6 @@ $ echo $?
 ```
 
 Observations:
+
 1. docker run options ```-a``` and ```-i``` aren't supported by dockrun.
 2. `-rm` makes dockrun automatically remove the resulting container
