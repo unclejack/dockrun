@@ -125,7 +125,16 @@ func main() {
 
 	args := os.Args[1:]
 	validateArgs(args)
-	finalArgs := append(defaultArgs, args...)
+
+	flagsToFilter := []string{"-rm"}
+
+	autoRemoveContainer := stringInArgs(args, "-rm")
+
+	filteredArgs := filterSlice(args, func(s string) bool {
+		return !stringInArgs(flagsToFilter, s)
+	})
+
+	finalArgs := append(defaultArgs, filteredArgs...)
 
 	runCmd := exec.Command("docker", finalArgs...)
 	if out, exitCode, err := runCommandWithOutput(runCmd); err != nil {
@@ -182,12 +191,14 @@ func main() {
 		fmt.Printf(logsOutput)
 	}
 
-	rmCmd := exec.Command("docker", "rm", containerID)
-	rmOutput, _, rmerr := runCommandWithOutput(rmCmd)
-	if rmerr != nil || strings.Contains(rmOutput, "Error") {
-		fmt.Printf("ERROR: docker rm: %s %s\n", rmOutput, rmerr)
-		fmt.Printf("ERROR: docker rm failed\n")
-		// fall through and let the return code of the container go through
+	if autoRemoveContainer {
+		rmCmd := exec.Command("docker", "rm", containerID)
+		rmOutput, _, rmerr := runCommandWithOutput(rmCmd)
+		if rmerr != nil || strings.Contains(rmOutput, "Error") {
+			fmt.Printf("ERROR: docker rm: %s %s\n", rmOutput, rmerr)
+			fmt.Printf("ERROR: docker rm failed\n")
+			// fall through and let the return code of the container go through
+		}
 	}
 	os.Exit(finalExitCode)
 }
