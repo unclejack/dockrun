@@ -112,10 +112,6 @@ func validateArgs(args []string) {
 	}
 
 	for _, val := range args {
-		if val == "-i" {
-			fmt.Println("ERROR: dockrun doesn't support -i")
-			failed = true
-		}
 		if val == "-a" {
 			fmt.Printf("ERROR: dockrun doesn't support -a")
 			failed = true
