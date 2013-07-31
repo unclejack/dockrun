@@ -237,6 +237,10 @@ func main() {
 		os.Exit(1)
 	}
 
+	if err = os.Remove(CIDFilename); err != nil {
+		fmt.Printf("WARNING: failed to remove container ID file\n")
+	}
+
 	if autoRemoveContainer {
 		rmCmd := exec.Command("docker", "rm", containerID)
 		rmOutput, _, rmerr := runCommandWithOutput(rmCmd)
