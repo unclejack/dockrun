@@ -149,6 +149,18 @@ func filterNamedArgs(flagsToFilter []string, args []string) []string {
 	return filteredArgs
 }
 
+func filterArgsByPosition(flagsToFilter []int, args []string) []string {
+	var positions []string
+	for _, v := range flagsToFilter {
+		positions = append(positions, strconv.Itoa(v))
+	}
+	filteredArgs := filterSlice(args, func(k int, s string) bool {
+		shouldFilter, _ := stringInArgs(positions, strconv.Itoa(k))
+		return !shouldFilter
+	})
+	return filteredArgs
+}
+
 // WARNING: 'docker wait', 'docker logs', 'docker rm', 'docker kill' and 'docker stop'
 // exit with status code 0 even if they've failed.
 
