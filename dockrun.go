@@ -113,7 +113,7 @@ func validateArgs(args []string) {
 
 	for _, val := range args {
 		if val == "-a" {
-			fmt.Printf("ERROR: dockrun doesn't support -a")
+			fmt.Printf("ERROR: dockrun doesn't support -a\n")
 			failed = true
 		}
 	}
@@ -163,7 +163,7 @@ func main() {
 	var CIDFilename string
 	getTempFilename := exec.Command("mktemp", "-u")
 	if out, exitCode, err := runCommandWithOutput(getTempFilename); err != nil {
-		fmt.Printf("mktemp failed: %s", CIDFilename)
+		fmt.Printf("mktemp failed: %s\n", CIDFilename)
 		fmt.Printf("ERROR mktemp failed with exit code: %d\n", exitCode)
 		os.Exit(1)
 	} else {
@@ -185,7 +185,7 @@ func main() {
 	for i := 0; i <= 10; i++ {
 		if out, err := ioutil.ReadFile(CIDFilename); err != nil {
 			if i == 10 {
-				fmt.Printf("ERROR couldn't read container ID from %s", CIDFilename)
+				fmt.Printf("ERROR couldn't read container ID from %s\n", CIDFilename)
 				os.Exit(1)
 			}
 		} else {
@@ -196,7 +196,7 @@ func main() {
 	}
 
 	if len(containerID) < 4 {
-		fmt.Printf("ERROR: docker container ID is too small, possibly invalid")
+		fmt.Printf("ERROR: docker container ID is too small, possibly invalid\n")
 		os.Exit(1)
 	}
 
