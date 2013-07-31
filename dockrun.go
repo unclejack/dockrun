@@ -2,12 +2,14 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"os/signal"
 	"strconv"
 	"strings"
 	"syscall"
+	"time"
 )
 
 type cmdResult struct {
@@ -149,7 +151,7 @@ func filterSlice(s []string, fn func(string) bool) []string {
 func main() {
 	var containerID string
 	var finalExitCode int
-	defaultArgs := []string{"run", "-d"}
+	defaultArgs := []string{"run", "-cidfile"}
 
 	args := os.Args[1:]
 	validateArgs(args)
@@ -162,16 +164,41 @@ func main() {
 		return !stringInArgs(flagsToFilter, s)
 	})
 
-	finalArgs := append(defaultArgs, filteredArgs...)
-
-	runCmd := exec.Command("docker", finalArgs...)
-	if out, exitCode, err := runCommandWithOutput(runCmd); err != nil {
-		fmt.Printf("docker run: %s", out)
-		fmt.Printf("ERROR docker exited with exit code: %d\n", exitCode)
+	var CIDFilename string
+	getTempFilename := exec.Command("mktemp", "-u")
+	if out, exitCode, err := runCommandWithOutput(getTempFilename); err != nil {
+		fmt.Printf("mktemp failed: %s", CIDFilename)
+		fmt.Printf("ERROR mktemp failed with exit code: %d\n", exitCode)
 		os.Exit(1)
 	} else {
-		containerID = strings.Trim(out, "\n")
+		CIDFilename = strings.Trim(string(out), "\n")
 	}
+
+	defaultArgs = append(defaultArgs, CIDFilename)
+	finalArgs := append(defaultArgs, filteredArgs...)
+
+	startCmd := exec.Command("docker", finalArgs...)
+	startCmd.Stdout = os.Stdout
+	startCmd.Stdin = os.Stdin
+	startCmd.Stderr = os.Stderr
+	if exitCode, err := startCommand(startCmd); err != nil {
+		fmt.Printf("ERROR docker exited with exit code: %d\n", exitCode)
+		os.Exit(1)
+	}
+
+	for i := 0; i <= 10; i++ {
+		if out, err := ioutil.ReadFile(CIDFilename); err != nil {
+			if i == 10 {
+				fmt.Printf("ERROR couldn't read container ID from %s", CIDFilename)
+				os.Exit(1)
+			}
+		} else {
+			containerID = strings.Trim(string(out), "\n")
+			break
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+
 	if len(containerID) < 4 {
 		fmt.Printf("ERROR: docker container ID is too small, possibly invalid")
 		os.Exit(1)
