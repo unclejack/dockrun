@@ -122,13 +122,13 @@ func validateArgs(args []string) {
 	}
 }
 
-func stringInArgs(args []string, target string) bool {
-	for _, value := range args {
+func stringInArgs(args []string, target string) (bool, int) {
+	for key, value := range args {
 		if value == target {
-			return true
+			return true, key
 		}
 	}
-	return false
+	return false, -1
 }
 
 func filterSlice(s []string, fn func(string) bool) []string {
@@ -154,10 +154,11 @@ func main() {
 
 	flagsToFilter := []string{"-rm"}
 
-	autoRemoveContainer := stringInArgs(args, "-rm")
+	autoRemoveContainer, _ := stringInArgs(args, "-rm")
 
 	filteredArgs := filterSlice(args, func(s string) bool {
-		return !stringInArgs(flagsToFilter, s)
+		shouldFilter, _ := stringInArgs(flagsToFilter, s)
+		return !shouldFilter
 	})
 
 	var CIDFilename string
