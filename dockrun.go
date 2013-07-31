@@ -167,6 +167,7 @@ func filterArgsByPosition(flagsToFilter []int, args []string) []string {
 func main() {
 	var containerID string
 	var finalExitCode int
+	var repo string
 	defaultArgs := []string{"run", "-cidfile"}
 
 	args := os.Args[1:]
@@ -175,6 +176,15 @@ func main() {
 	flagsToFilter := []string{"-rm"}
 
 	autoRemoveContainer, _ := stringInArgs(args, "-rm")
+	commitContainer, commitArgPosition := stringInArgs(args, "-commit")
+
+	if commitContainer {
+		repoArgPosition := commitArgPosition + 1
+		repo = args[repoArgPosition]
+
+		argPositionsToFilter := []int{repoArgPosition, commitArgPosition}
+		args = filterArgsByPosition(argPositionsToFilter, args)
+	}
 
 	filteredArgs := filterNamedArgs(flagsToFilter, args)
 
@@ -253,6 +263,32 @@ func main() {
 
 	if err = os.Remove(CIDFilename); err != nil {
 		fmt.Printf("WARNING: failed to remove container ID file\n")
+	}
+
+	if commitContainer && finalExitCode == 0 {
+		commitCmd := exec.Command("docker", "commit", containerID)
+		commitOutput, _, err := runCommandWithOutput(commitCmd)
+		if err != nil || strings.Contains(commitOutput, "Error") {
+			fmt.Printf("ERROR: docker commit failed: %s %s\n", commitOutput, err)
+			os.Exit(1)
+		}
+
+		var tagCmd *exec.Cmd
+		imageID := strings.Trim(string(commitOutput), "\n")
+		repoAndTag := strings.Split(repo, ":")
+		if len(repoAndTag) > 1 {
+			repoName := repoAndTag[0]
+			tag := repoAndTag[1]
+			tagCmd = exec.Command("docker", "tag", imageID, repoName, tag)
+		} else {
+			tagCmd = exec.Command("docker", "tag", imageID, repo)
+		}
+
+		tagOutput, _, err := runCommandWithOutput(tagCmd)
+		if err != nil || strings.Contains(tagOutput, "Error") {
+			fmt.Printf("ERROR: docker tag failed: %s %s\n", tagOutput, err)
+			os.Exit(1)
+		}
 	}
 
 	if autoRemoveContainer {
