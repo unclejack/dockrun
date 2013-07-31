@@ -141,6 +141,14 @@ func filterSlice(s []string, fn func(int, string) bool) []string {
 	return newSlice
 }
 
+func filterNamedArgs(flagsToFilter []string, args []string) []string {
+	filteredArgs := filterSlice(args, func(k int, s string) bool {
+		shouldFilter, _ := stringInArgs(flagsToFilter, s)
+		return !shouldFilter
+	})
+	return filteredArgs
+}
+
 // WARNING: 'docker wait', 'docker logs', 'docker rm', 'docker kill' and 'docker stop'
 // exit with status code 0 even if they've failed.
 
@@ -156,10 +164,7 @@ func main() {
 
 	autoRemoveContainer, _ := stringInArgs(args, "-rm")
 
-	filteredArgs := filterSlice(args, func(k int, s string) bool {
-		shouldFilter, _ := stringInArgs(flagsToFilter, s)
-		return !shouldFilter
-	})
+	filteredArgs := filterNamedArgs(flagsToFilter, args)
 
 	var CIDFilename string
 	getTempFilename := exec.Command("mktemp", "-u")
