@@ -131,10 +131,10 @@ func stringInArgs(args []string, target string) (bool, int) {
 	return false, -1
 }
 
-func filterSlice(s []string, fn func(string) bool) []string {
+func filterSlice(s []string, fn func(int, string) bool) []string {
 	var newSlice []string
-	for _, v := range s {
-		if fn(v) {
+	for k, v := range s {
+		if fn(k, v) {
 			newSlice = append(newSlice, v)
 		}
 	}
@@ -156,7 +156,7 @@ func main() {
 
 	autoRemoveContainer, _ := stringInArgs(args, "-rm")
 
-	filteredArgs := filterSlice(args, func(s string) bool {
+	filteredArgs := filterSlice(args, func(k int, s string) bool {
 		shouldFilter, _ := stringInArgs(flagsToFilter, s)
 		return !shouldFilter
 	})
