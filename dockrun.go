@@ -237,15 +237,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	logsCmd := exec.Command("docker", "logs", containerID)
-	logsOutput, _, logserr := runCommandWithOutput(logsCmd)
-	if logserr != nil || strings.Contains(logsOutput, "No such container") {
-		fmt.Printf("ERROR: docker logs: %s %s\n", logsOutput, logserr)
-		fmt.Printf("ERROR: docker logs failed\n")
-	} else {
-		fmt.Printf(logsOutput)
-	}
-
 	if autoRemoveContainer {
 		rmCmd := exec.Command("docker", "rm", containerID)
 		rmOutput, _, rmerr := runCommandWithOutput(rmCmd)
