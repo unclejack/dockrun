@@ -81,18 +81,11 @@ func runCommandSendResult(cmd *exec.Cmd, c chan cmdResult) {
 }
 
 func waitForResult(containerID string, signals chan os.Signal, waitCmd chan cmdResult) cmdResult {
-	var action string
 	for {
 		select {
 		case sig := <-signals:
-			switch sig {
-			case syscall.SIGINT:
-				action = "stop"
-			case syscall.SIGTERM:
-				action = "stop"
-			}
 			fmt.Printf("Received signal: %s; cleaning up\n", sig)
-			cmd := exec.Command("docker", action, "-t", "2", containerID)
+			cmd := exec.Command("docker", "stop", "-t", "2", containerID)
 			out, _, err := runCommandWithOutput(cmd)
 			if err != nil || strings.Contains(out, "Error") {
 				fmt.Printf("stopping container via signal %s failed\n", sig)
