@@ -170,6 +170,7 @@ func main() {
 
 	autoRemoveContainer, _ := stringInArgs(args, "-rm")
 	commitContainer, commitArgPosition := stringInArgs(args, "-commit")
+	userCIDFile, userCIDFilePosition := stringInArgs(args, "-cidfile")
 
 	if commitContainer {
 		repoArgPosition := commitArgPosition + 1
@@ -179,16 +180,27 @@ func main() {
 		args = filterArgsByPosition(argPositionsToFilter, args)
 	}
 
+	CIDFilename := ""
+
+	if userCIDFile {
+		namePosition := userCIDFilePosition + 1
+		CIDFilename = args[namePosition]
+
+		argPositionsToFilter := []int{namePosition, userCIDFilePosition}
+		args = filterArgsByPosition(argPositionsToFilter, args)
+	}
+
 	filteredArgs := filterNamedArgs(flagsToFilter, args)
 
-	var CIDFilename string
-	getTempFilename := exec.Command("mktemp", "-u")
-	if out, exitCode, err := runCommandWithOutput(getTempFilename); err != nil {
-		fmt.Printf("mktemp failed: %s\n", CIDFilename)
-		fmt.Printf("ERROR mktemp failed with exit code: %d\n", exitCode)
-		os.Exit(1)
-	} else {
-		CIDFilename = strings.Trim(string(out), "\n")
+	if len(CIDFilename) == 0 {
+		getTempFilename := exec.Command("mktemp", "-u")
+		if out, exitCode, err := runCommandWithOutput(getTempFilename); err != nil {
+			fmt.Printf("mktemp failed: %s\n", CIDFilename)
+			fmt.Printf("ERROR mktemp failed with exit code: %d\n", exitCode)
+			os.Exit(1)
+		} else {
+			CIDFilename = strings.Trim(string(out), "\n")
+		}
 	}
 
 	defaultArgs = append(defaultArgs, CIDFilename)
