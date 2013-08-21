@@ -100,7 +100,7 @@ func validateArgs(args []string) {
 	failed := false
 	if len(args) < 1 {
 		fmt.Println("dockrun [OPTIONS] IMAGE [COMMAND]")
-		fmt.Println("OPTIONS - same options as docker run, without -a & -i")
+		fmt.Println("OPTIONS - same options as docker run, without -a & -d")
 		failed = true
 	}
 
